@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ffffff">
+  <title>VastraLane | Fashion Store</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink: #282c3f; --muted: #7e818c; --pink: #ff3f6c; --green: #14958f; --line: #e9e9eb; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: #f5f5f6; font-family: 'DM Sans', sans-serif; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .brand-font { font-family: 'Manrope', sans-serif; }
+    .header-shadow { box-shadow: 0 4px 12px rgba(40,44,63,.07); }
+    .product-card { transition: transform .2s ease, box-shadow .2s ease; }
+    .product-card:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(40,44,63,.13); }
+    .product-image { aspect-ratio: 4 / 5; background: #ececee; object-fit: cover; }
+    .modal-backdrop { background: rgba(25, 28, 39, .5); backdrop-filter: blur(2px); }
+    .drawer { box-shadow: -12px 0 36px rgba(20,24,35,.16); }
+    .toast-in { animation: toast-in .25s ease-out both; }
+    @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    .tick-draw { stroke-dasharray: 48; stroke-dashoffset: 48; animation: draw .55s .15s ease forwards; }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { scrollbar-width: none; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="header-shadow sticky top-0 z-30 bg-white">
+    <div class="mx-auto flex h-[72px] max-w-[1440px] items-center gap-5 px-4 sm:px-8 lg:px-12">
+      <a href="#" id="storeLogo" class="brand-font flex shrink-0 items-center gap-2 font-extrabold tracking-tight" aria-label="Myntra Clone home">
+        <span class="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#ff3f6c] to-[#ff8a5b] text-sm font-extrabold text-white">V</span>
+        <span class="hidden text-[17px] sm:inline"> VastraLane <span class="text-[#ff3f6c]">.</span></span>
+      </a>
+      <nav class="hidden h-full shrink-0 items-center gap-6 lg:flex" aria-label="Main categories">
+        <button class="nav-category h-full border-b-[3px] border-transparent pt-[3px] text-[12px] font-extrabold tracking-wide hover:border-[#ff3f6c]" data-category="Men">MEN</button>
+        <button class="nav-category h-full border-b-[3px] border-transparent pt-[3px] text-[12px] font-extrabold tracking-wide hover:border-[#ff3f6c]" data-category="Women">WOMEN</button>
+        <button class="nav-category h-full border-b-[3px] border-transparent pt-[3px] text-[12px] font-extrabold tracking-wide hover:border-[#ff3f6c]" data-category="Kids">KIDS</button>
+        <button class="nav-category h-full border-b-[3px] border-transparent pt-[3px] text-[12px] font-extrabold tracking-wide hover:border-[#ff3f6c]" data-category="Beauty">BEAUTY</button>
+      </nav>
+      <label class="flex min-w-0 flex-1 items-center gap-3 rounded-md bg-[#f5f5f6] px-3 py-[11px] transition focus-within:bg-white focus-within:ring-1 focus-within:ring-[#d4d5d9] sm:ml-2 sm:px-4">
+        <svg class="h-[18px] w-[18px] shrink-0 text-[#696e79]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="searchInput" type="search" placeholder="Search for products, brands and more" class="w-full min-w-0 bg-transparent text-[12px] outline-none placeholder:text-[#858995] sm:text-[13px]" autocomplete="off">
+      </label>
+      <div class="flex shrink-0 items-center gap-3 sm:gap-5">
+        <button id="wishlistHeaderBtn" class="hidden flex-col items-center gap-1 text-[10px] font-bold sm:flex" aria-label="Wishlist">
+          <svg class="h-[19px] w-[19px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20.8 8.7c0 5.2-8.8 10.2-8.8 10.2S3.2 13.9 3.2 8.7A4.4 4.4 0 0 1 12 6.6a4.4 4.4 0 0 1 8.8 2.1Z"/></svg>WISHLIST
+        </button>
+        <button id="cartIconBtn" class="relative flex flex-col items-center gap-1 text-[10px] font-bold" aria-label="Open shopping bag">
+          <svg class="h-[19px] w-[19px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 8h14l1 13H4L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>BAG
+          <span id="cartBadge" class="absolute -right-2 -top-1 hidden h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#ff3f6c] px-1 text-[10px] leading-none text-white">0</span>
+        </button>
+      </div>
+    </div>
+    <nav class="no-scrollbar flex gap-2 overflow-x-auto border-t border-[#f2f2f3] px-4 py-2 lg:hidden" aria-label="Shop by category">
+      <button class="category-chip rounded-full bg-[#282c3f] px-4 py-1.5 text-[11px] font-bold text-white" data-category="All">All</button>
+      <button class="category-chip rounded-full bg-[#f5f5f6] px-4 py-1.5 text-[11px] font-bold" data-category="Men">Men</button>
+      <button class="category-chip rounded-full bg-[#f5f5f6] px-4 py-1.5 text-[11px] font-bold" data-category="Women">Women</button>
+      <button class="category-chip rounded-full bg-[#f5f5f6] px-4 py-1.5 text-[11px] font-bold" data-category="Kids">Kids</button>
+      <button class="category-chip rounded-full bg-[#f5f5f6] px-4 py-1.5 text-[11px] font-bold" data-category="Beauty">Beauty</button>
+    </nav>
+  </header>
+
+  <main class="mx-auto min-h-[calc(100vh-145px)] max-w-[1440px] px-4 pb-14 pt-7 sm:px-8 lg:px-12 lg:pt-10">
+    <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <p class="mb-1 text-[10px] font-bold uppercase tracking-[.16em] text-[#9497a0]">NEW COLLECTION</p>
+        <h1 class="brand-font text-[22px] font-extrabold sm:text-[27px]">Trending Styles <span class="font-semibold text-[#8a8d97]">for you</span></h1>
+      </div>
+      <p id="productCount" class="pb-1 text-[12px] text-[#7e818c]"></p>
+    </div>
+    <div class="mb-5 hidden items-center gap-2 lg:flex" aria-label="Filter by category">
+      <button class="category-chip rounded-full bg-[#282c3f] px-4 py-2 text-[11px] font-bold text-white" data-category="All">All</button>
+      <button class="category-chip rounded-full bg-white px-4 py-2 text-[11px] font-bold hover:bg-[#fce9ee]" data-category="Men">Men</button>
+      <button class="category-chip rounded-full bg-white px-4 py-2 text-[11px] font-bold hover:bg-[#fce9ee]" data-category="Women">Women</button>
+      <button class="category-chip rounded-full bg-white px-4 py-2 text-[11px] font-bold hover:bg-[#fce9ee]" data-category="Kids">Kids</button>
+      <button class="category-chip rounded-full bg-white px-4 py-2 text-[11px] font-bold hover:bg-[#fce9ee]" data-category="Beauty">Beauty</button>
+    </div>
+    <section id="productGrid" class="grid grid-cols-2 gap-x-3 gap-y-6 sm:gap-x-5 sm:gap-y-8 lg:grid-cols-4 lg:gap-x-6" aria-label="Products"></section>
+    <div id="emptyState" class="hidden py-20 text-center">
+      <p class="brand-font text-lg font-bold">No matching styles found</p>
+      <p class="mt-2 text-sm text-[#7e818c]">Try another search or category.</p>
+    </div>
+  </main>
+
+  <footer class="border-t border-[#e9e9eb] bg-white px-4 py-7 text-center text-[11px] text-[#7e818c]">A little more style, every day. <span id="footerStoreName"></span></footer>
+
+  <button id="whatsappBtn" class="fixed bottom-5 right-5 z-40 rounded-full bg-[#25d366] px-4 py-3 text-[12px] font-extrabold text-white shadow-lg transition hover:bg-[#1fb857]" aria-label="Contact us on WhatsApp">WhatsApp</button>
+
+  <div id="productModal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center overflow-y-auto p-3 sm:p-6" role="dialog" aria-modal="true" aria-label="Product details">
+    <div class="relative my-auto grid w-full max-w-[780px] overflow-hidden rounded-sm bg-white shadow-2xl md:grid-cols-2">
+      <button class="modal-close absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-xl text-[#535665] shadow-sm" aria-label="Close product details">&times;</button>
+      <div class="min-h-[300px] bg-[#f2f2f3] md:min-h-[510px]"><img id="modalProductImage" class="h-full max-h-[620px] min-h-[300px] w-full object-cover md:min-h-[510px]" alt=""></div>
+      <div class="p-5 sm:p-8">
+        <p id="modalProductBrand" class="brand-font text-[21px] font-extrabold"></p>
+        <p id="modalProductTitle" class="mt-1 text-[14px] text-[#696e79]"></p>
+        <div class="mt-4 flex items-center gap-2"><span id="modalProductRating" class="rounded border border-[#d4d5d9] px-2 py-1 text-[12px] font-bold"></span><span class="text-[12px] text-[#7e818c]">Customer rating</span></div>
+        <div class="mt-5 border-y border-[#e9e9eb] py-4">
+          <p class="flex flex-wrap items-baseline gap-2"><strong id="modalProductPrice" class="text-[22px]"></strong><del id="modalProductMrp" class="text-[14px] text-[#9497a0]"></del><span id="modalProductDiscount" class="text-[13px] font-bold text-[#ff905a]"></span></p>
+          <p class="mt-1 text-[11px] font-semibold text-[#14958f]">inclusive of all taxes</p>
+        </div>
+        <div class="mt-5">
+          <div class="mb-3 flex items-center justify-between"><h2 class="text-[12px] font-extrabold">SELECT SIZE</h2><span id="sizeHint" class="text-[11px] text-[#7e818c]">Size chart</span></div>
+          <div id="sizeOptions" class="flex flex-wrap gap-2"></div>
+        </div>
+        <div class="mt-7 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <button id="modalAddToCartBtn" class="rounded-sm bg-[#ff3f6c] px-3 py-3 text-[11px] font-extrabold tracking-wide text-white transition hover:bg-[#e83360]">ADD TO BAG</button>
+          <button id="modalBuyNowBtn" class="rounded-sm border border-[#282c3f] px-3 py-3 text-[11px] font-extrabold tracking-wide transition hover:bg-[#282c3f] hover:text-white">BUY NOW</button>
+          <button id="modalWishlistBtn" class="rounded-sm border border-[#d4d5d9] px-3 py-3 text-[11px] font-extrabold tracking-wide hover:border-[#282c3f]">♡ WISHLIST</button>
+        </div>
+        <p class="mt-6 border-t border-[#e9e9eb] pt-4 text-[12px] leading-5 text-[#696e79]">100% original products · Easy 14 day returns · Delivery details available at checkout</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="cartModal" class="fixed inset-0 z-50 hidden justify-end" role="dialog" aria-modal="true" aria-label="Shopping bag">
+    <button id="cartOverlay" class="absolute inset-0 cursor-default bg-black/50 opacity-0 transition-opacity duration-300" aria-label="Close bag"></button>
+    <aside id="cartPanel" class="drawer relative z-10 flex h-full w-full max-w-[460px] translate-x-full flex-col bg-[#f5f5f6] transition-transform duration-300">
+      <div class="flex items-center justify-between border-b border-[#e9e9eb] bg-white px-5 py-4">
+        <div><h2 class="brand-font text-[17px] font-extrabold">My Bag <span id="cartItemCount" class="font-semibold text-[#7e818c]"></span></h2><p class="mt-0.5 text-[11px] text-[#7e818c]">Your next favourite is right here</p></div>
+        <button id="closeCartBtn" class="grid h-9 w-9 place-items-center rounded-full text-2xl text-[#696e79] hover:bg-[#f5f5f6]" aria-label="Close bag">&times;</button>
+      </div>
+      <div id="deliveryNote" class="mx-4 mt-4 rounded-sm border border-[#e9e9eb] bg-white px-4 py-3 text-[12px] text-[#535665]"></div>
+      <div id="cartItemsList" class="no-scrollbar flex-1 space-y-3 overflow-y-auto px-4 py-4"></div>
+      <div id="priceDetails" class="border-t border-[#e9e9eb] bg-white px-5 pb-5 pt-4">
+        <h3 class="mb-4 text-[12px] font-extrabold tracking-wide">PRICE DETAILS</h3>
+        <div class="space-y-2 text-[12px] text-[#535665]"><div class="flex justify-between"><span>Total MRP</span><span id="cartMrpTotal"></span></div><div class="flex justify-between"><span>Discount on MRP</span><span id="cartDiscountTotal" class="text-[#14958f]"></span></div><div class="flex justify-between"><span>Convenience fee</span><span class="text-[#14958f]">FREE</span></div><div class="flex justify-between"><span>Delivery</span><span id="cartDelivery"></span></div></div>
+        <div class="mt-4 flex justify-between border-t border-dashed border-[#d4d5d9] pt-4 text-[14px] font-extrabold"><span>Total Amount</span><span id="cartSubtotal"></span></div>
+        <button id="checkoutBtn" class="mt-4 w-full rounded-sm bg-[#ff3f6c] py-3.5 text-[12px] font-extrabold tracking-wide text-white transition hover:bg-[#e83360] disabled:cursor-not-allowed disabled:opacity-40">PLACE ORDER <span id="cartGrandTotal" class="ml-1"></span></button>
+      </div>
+    </aside>
+  </div>
+
+  <div id="addressModal" class="fixed inset-0 z-[60] hidden items-center justify-center overflow-y-auto bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="addressTitle">
+    <form id="addressForm" class="relative my-auto w-full max-w-md bg-white p-5 shadow-2xl sm:p-8" novalidate>
+      <button type="button" id="closeAddressModal" class="modal-close absolute right-4 top-3 grid h-9 w-9 place-items-center text-2xl text-[#696e79]" aria-label="Close address form">&times;</button>
+      <h2 id="addressTitle" class="brand-font pr-8 text-[22px] font-extrabold">Delivery Address</h2>
+      <div class="mt-6 space-y-3">
+        <input id="custName" name="name" required maxlength="80" autocomplete="name" class="w-full rounded-sm border border-[#d4d5d9] px-3 py-3 text-[13px] outline-none focus:border-black" placeholder="Full Name">
+        <input id="custPhone" name="phone" type="tel" required maxlength="20" autocomplete="tel" class="w-full rounded-sm border border-[#d4d5d9] px-3 py-3 text-[13px] outline-none focus:border-black" placeholder="Phone Number">
+        <textarea id="custAddress" name="address" required maxlength="180" autocomplete="street-address" rows="3" class="w-full resize-y rounded-sm border border-[#d4d5d9] px-3 py-3 text-[13px] outline-none focus:border-black" placeholder="House No, Building, Street, Area*"></textarea>
+      </div>
+      <p id="addressError" class="mt-3 hidden text-[12px] font-semibold text-[#e53958]" role="alert"></p>
+      <button id="confirmOrderBtn" type="submit" class="mt-5 w-full rounded-sm bg-black py-3.5 text-[12px] font-extrabold tracking-wide text-white hover:bg-[#282c3f]">CONFIRM ORDER</button>
+    </form>
+  </div>
+
+  <div id="successModal" class="fixed inset-0 z-[70] hidden items-center justify-center overflow-y-auto bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+    <div class="my-auto w-full max-w-md bg-white p-8 text-center shadow-2xl">
+      <div class="mx-auto grid h-20 w-20 animate-bounce place-items-center rounded-full border-4 border-green-500 text-5xl font-bold text-green-500" aria-hidden="true">✓</div>
+      <h2 id="successTitle" class="brand-font mt-5 text-[22px] font-extrabold">Order Successful!</h2>
+      <p id="successOrderId" class="mt-2 break-all text-[12px] font-semibold text-[#696e79]"></p>
+      <p class="mt-3 text-[13px] text-[#535665]">Your order will be delivered in 3-4 days</p>
+      <p id="successAddressSummary" class="mt-4 text-[12px] leading-5 text-[#696e79]"></p>
+      <button id="continueShoppingBtn" class="mt-7 w-full rounded-sm bg-black px-7 py-3 text-[12px] font-extrabold tracking-wide text-white hover:bg-[#282c3f]">Continue Shopping</button>
+    </div>
+  </div>
+  <div id="toast" class="fixed bottom-5 left-1/2 z-[80] hidden -translate-x-1/2 rounded-sm bg-[#282c3f] px-5 py-3 text-[12px] font-semibold text-white shadow-xl" role="status" aria-live="polite"></div>
+
+  <script src="store-config.js"></script>
+  <script>
+    const config = STORE_CONFIG;
+    const products = config.products;
+    let activeCategory = "All";
+    let selectedProductId = null;
+    let selectedSize = null;
+    let selectedProductForBuy = null;
+    let selectedSizes = {};
+    let cart = loadCart();
+    let wishlist = loadWishlist();
+
+    const productGrid = document.getElementById("productGrid");
+    const productModal = document.getElementById("productModal");
+    const cartModal = document.getElementById("cartModal");
+    const addressModal = document.getElementById("addressModal");
+    const successModal = document.getElementById("successModal");
+    const money = (amount) => `${config.currency}${Number(amount).toLocaleString("en-IN")}`;
+
+    function loadCart() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("myntra_cart") || "[]");
+        return Array.isArray(saved) ? saved.filter((item) => products.some((product) => product.id === Number(item.id)) && typeof item.size === "string" && Number(item.qty) > 0) : [];
+      } catch { return []; }
+    }
+
+    function loadWishlist() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("myntra_wishlist") || "[]");
+        return new Set(Array.isArray(saved) ? saved.map(Number) : []);
+      } catch { return new Set(); }
+    }
+
+    function saveCart() {
+      try { localStorage.setItem("myntra_cart", JSON.stringify(cart)); } catch { showToast("Could not save your bag on this device"); }
+    }
+
+    function saveWishlist() {
+      try { localStorage.setItem("myntra_wishlist", JSON.stringify([...wishlist])); } catch { showToast("Could not save wishlist on this device"); }
+    }
+
+    function renderProducts() {
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+      const filtered = products.filter((product) => {
+        const matchesCategory = activeCategory === "All" || product.category === activeCategory;
+        const matchesQuery = `${product.brand} ${product.title} ${product.category}`.toLowerCase().includes(query);
+        return matchesCategory && matchesQuery;
+      });
+      document.getElementById("productCount").textContent = `${filtered.length} ${filtered.length === 1 ? "style" : "styles"}`;
+      document.getElementById("emptyState").classList.toggle("hidden", filtered.length > 0);
+      productGrid.innerHTML = filtered.map((product) => `
+        <article class="product-card group relative cursor-pointer overflow-hidden bg-white" data-product-id="${product.id}" tabindex="0" role="button" aria-label="View ${escapeHTML(product.brand)} ${escapeHTML(product.title)}">
+          <div class="relative overflow-hidden">
+            ${product.stock !== undefined && product.stock <= 3 && product.stock > 0 ? `<span class="absolute left-2 top-2 z-10 bg-white text-[10px] font-bold px-2 py-1 rounded-md shadow">Only ${product.stock} left!</span>` : ''}
+            ${product.stock === 0 ? `<span class="absolute left-2 top-2 z-10 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md">Out of Stock</span>` : ''}
+            <img class="product-image block w-full transition duration-300 group-hover:scale-[1.02]" src="${escapeHTML(product.images[0])}" alt="${escapeHTML(product.brand)} ${escapeHTML(product.title)}" loading="lazy">
+            <span class="absolute bottom-2 left-2 rounded-sm bg-white/95 px-2 py-1 text-[10px] font-bold shadow-sm">★ ${Number(product.rating).toFixed(1)} <span class="text-[#d4d5d9]">|</span> ${Number(product.reviews || 0).toLocaleString("en-IN")}</span>
+            <button class="wishlist-card absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-lg shadow-sm transition hover:scale-105 ${wishlist.has(product.id) ? "text-[#ff3f6c]" : "text-[#535665]"}" data-wishlist-id="${product.id}" aria-label="${wishlist.has(product.id) ? "Remove from" : "Add to"} wishlist">${wishlist.has(product.id) ? "♥" : "♡"}</button>
+          </div>
+          <div class="px-3 pb-3 pt-3 sm:px-4 sm:pb-4">
+            <h2 class="truncate text-[13px] font-extrabold sm:text-[14px]">${escapeHTML(product.brand)}</h2>
+            <p class="mt-0.5 truncate text-[11px] text-[#7e818c] sm:text-[12px]">${escapeHTML(product.title)}</p>
+            <p class="mt-2 flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-[11px] sm:text-[12px]"><strong class="text-[12px] text-[#282c3f] sm:text-[13px]">${money(product.price)}</strong><del class="text-[10px] text-[#9497a0]">${money(product.mrp)}</del><span class="text-[10px] font-semibold text-[#ff905a]">(${Number(product.discount)}% OFF)</span></p>
+            <div class="mt-3 grid grid-cols-2 gap-2">
+              <button class="card-add-to-bag rounded-sm border border-[#d4d5d9] py-2 text-[10px] font-extrabold tracking-wide hover:border-[#ff3f6c] hover:text-[#ff3f6c]" data-add-id="${product.id}">ADD TO BAG</button>
+              <button class="card-buy-now rounded-sm bg-black py-2 text-[10px] font-extrabold tracking-wide text-white hover:bg-[#282c3f]" data-buy-id="${product.id}">BUY NOW</button>
+            </div>
+          </div>
+        </article>`).join("");
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+    }
+
+    function setModal(modal, isOpen, display = "flex") {
+      modal.classList.toggle("hidden", !isOpen);
+      modal.classList.toggle(display, isOpen);
+      document.body.style.overflow = isOpen ? "hidden" : "auto";
+      if (modal === addressModal && !isOpen) selectedProductForBuy = null;
+    }
+
+    function openProductModal(pid) {
+      const product = products.find((item) => item.id === Number(pid));
+      if (!product) return;
+      selectedProductId = product.id;
+      selectedSize = null;
+      document.getElementById("modalProductImage").src = product.images[0];
+      document.getElementById("modalProductImage").alt = `${product.brand} ${product.title}`;
+      document.getElementById("modalProductBrand").textContent = product.brand;
+      document.getElementById("modalProductTitle").textContent = product.title;
+      document.getElementById("modalProductRating").textContent = `★ ${Number(product.rating).toFixed(1)} · ${Number(product.reviews || 0).toLocaleString("en-IN")}`;
+      document.getElementById("modalProductPrice").textContent = money(product.price);
+      document.getElementById("modalProductMrp").textContent = money(product.mrp);
+      document.getElementById("modalProductDiscount").textContent = `(${product.discount}% OFF)`;
+      document.getElementById("sizeHint").textContent = product.category === "Beauty" ? "Product size" : "Size chart";
+      document.getElementById("sizeOptions").innerHTML = product.sizes.map((size) => `<button class="size-btn grid min-h-10 min-w-10 place-items-center rounded-full border border-[#d4d5d9] px-2 text-[11px] font-bold transition hover:border-black" data-size="${escapeHTML(size)}">${escapeHTML(size)}</button>`).join("");
+      updateModalWishlistButton();
+      setModal(productModal, true);
+    }
+
+    function updateModalWishlistButton() {
+      const button = document.getElementById("modalWishlistBtn");
+      const active = wishlist.has(selectedProductId);
+      button.textContent = active ? "♥ WISHLISTED" : "♡ WISHLIST";
+      button.classList.toggle("text-[#ff3f6c]", active);
+    }
+
+    function addToCart(productId, size) {
+      const product = products.find((item) => item.id === Number(productId));
+      if (!product) return;
+      size = size || product.sizes[0];
+      const existing = cart.find((item) => item.id === product.id && item.size === size);
+      if (existing) existing.qty += 1;
+      else cart.push({ id: product.id, size, qty: 1 });
+      saveCart();
+      updateCartUI();
+      if (!productModal.classList.contains("hidden")) setModal(productModal, false);
+      showToast("Added to Bag");
+    }
+
+    function removeFromCart(pid, size) {
+      cart = cart.filter((item) => !(item.id === Number(pid) && item.size === size));
+      saveCart();
+      updateCartUI();
+    }
+
+    function changeQty(pid, size, change) {
+      const item = cart.find((entry) => entry.id === Number(pid) && entry.size === size);
+      if (!item) return;
+      item.qty += change;
+      if (item.qty <= 0) removeFromCart(pid, size);
+      else { saveCart(); updateCartUI(); }
+    }
+
+    function updateCartUI() {
+      const badge = document.getElementById("cartBadge");
+      const itemCount = cart.reduce((total, item) => total + item.qty, 0);
+      badge.textContent = itemCount > 99 ? "99+" : String(itemCount);
+      badge.classList.toggle("hidden", itemCount === 0);
+      badge.classList.toggle("flex", itemCount > 0);
+      document.getElementById("cartItemCount").textContent = `(${itemCount} ${itemCount === 1 ? "item" : "items"})`;
+      const subtotal = cart.reduce((total, item) => {
+        const product = products.find((entry) => entry.id === item.id);
+        return total + (product ? product.price * item.qty : 0);
+      }, 0);
+      const mrpTotal = cart.reduce((total, item) => {
+        const product = products.find((entry) => entry.id === item.id);
+        return total + (product ? product.mrp * item.qty : 0);
+      }, 0);
+      const delivery = subtotal === 0 || subtotal >= config.freeDeliveryOn ? 0 : 49;
+      const grandTotal = subtotal + delivery;
+      document.getElementById("cartMrpTotal").textContent = money(mrpTotal);
+      document.getElementById("cartDiscountTotal").textContent = `-${money(mrpTotal - subtotal)}`;
+      document.getElementById("cartDelivery").textContent = delivery === 0 ? "FREE" : money(delivery);
+      document.getElementById("cartSubtotal").textContent = money(grandTotal);
+      document.getElementById("cartGrandTotal").textContent = money(grandTotal);
+      document.getElementById("checkoutBtn").disabled = itemCount === 0;
+      document.getElementById("deliveryNote").textContent = subtotal === 0 ? `Free delivery on orders above ${money(config.freeDeliveryOn)}` : subtotal >= config.freeDeliveryOn ? "Yay! Your order qualifies for free delivery." : `Add ${money(config.freeDeliveryOn - subtotal)} more for free delivery.`;
+      const list = document.getElementById("cartItemsList");
+      if (cart.length === 0) {
+        list.innerHTML = '<div class="flex h-full min-h-[220px] flex-col items-center justify-center text-center"><div class="mb-3 grid h-14 w-14 place-items-center rounded-full bg-white text-2xl">♡</div><p class="text-[14px] font-bold">Your bag is empty</p><p class="mt-1 text-[12px] text-[#7e818c]">Add something you love.</p></div>';
+        return;
+      }
+      list.innerHTML = cart.map((item) => {
+        const product = products.find((entry) => entry.id === item.id);
+        if (!product) return "";
+        return `<article class="flex gap-3 border border-[#e9e9eb] bg-white p-3"><img src="${escapeHTML(product.images[0])}" alt="" class="h-[112px] w-[84px] shrink-0 bg-[#f2f2f3] object-cover"><div class="min-w-0 flex-1"><div class="flex items-start justify-between gap-2"><div class="min-w-0"><h3 class="truncate text-[12px] font-extrabold">${escapeHTML(product.brand)}</h3><p class="mt-0.5 line-clamp-2 text-[11px] text-[#7e818c]">${escapeHTML(product.title)}</p></div><button class="remove-item text-xl leading-none text-[#9497a0] hover:text-[#ff3f6c]" data-id="${product.id}" data-size="${escapeHTML(item.size)}" aria-label="Remove ${escapeHTML(product.title)}">&times;</button></div><p class="mt-2 text-[11px] text-[#535665]">Size: <strong>${escapeHTML(item.size)}</strong></p><p class="mt-1 text-[12px] font-extrabold">${money(product.price)} <del class="ml-1 text-[10px] font-normal text-[#9497a0]">${money(product.mrp)}</del></p><div class="mt-2 flex items-center gap-2"><span class="text-[10px] text-[#7e818c]">Qty</span><button class="qty-change grid h-6 w-6 place-items-center rounded-full border border-[#d4d5d9] text-sm" data-id="${product.id}" data-size="${escapeHTML(item.size)}" data-change="-1" aria-label="Decrease quantity">−</button><span class="min-w-4 text-center text-[11px] font-bold">${item.qty}</span><button class="qty-change grid h-6 w-6 place-items-center rounded-full border border-[#d4d5d9] text-sm" data-id="${product.id}" data-size="${escapeHTML(item.size)}" data-change="1" aria-label="Increase quantity">+</button></div></div></article>`;
+      }).join("");
+    }
+
+    function openCartModal() {
+      clearTimeout(closeCartModal.timeout);
+      updateCartUI();
+      cartModal.classList.remove("hidden");
+      cartModal.classList.add("flex");
+      document.body.style.overflow = "hidden";
+      requestAnimationFrame(() => {
+        document.getElementById("cartPanel").classList.remove("translate-x-full");
+        document.getElementById("cartOverlay").classList.add("opacity-100");
+      });
+    }
+
+    function closeCartModal() {
+      document.getElementById("cartPanel").classList.add("translate-x-full");
+      document.getElementById("cartOverlay").classList.remove("opacity-100");
+      document.body.style.overflow = "auto";
+      closeCartModal.timeout = setTimeout(() => {
+        cartModal.classList.add("hidden");
+        cartModal.classList.remove("flex");
+      }, 300);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.remove("hidden", "toast-in");
+      void toast.offsetWidth;
+      toast.classList.add("toast-in");
+      clearTimeout(showToast.timeout);
+      showToast.timeout = setTimeout(() => toast.classList.add("hidden"), 2400);
+    }
+
+    function closeTopModal() {
+      if (!successModal.classList.contains("hidden")) setModal(successModal, false);
+      else if (!addressModal.classList.contains("hidden")) setModal(addressModal, false);
+      else if (!cartModal.classList.contains("hidden")) closeCartModal();
+      else if (!productModal.classList.contains("hidden")) setModal(productModal, false);
+    }
+
+    function beginCheckout() {
+      if (cart.length === 0) return;
+      selectedProductForBuy = null;
+      if (cartModal.classList.contains("flex")) closeCartModal();
+      if (!productModal.classList.contains("hidden")) setModal(productModal, false);
+      document.getElementById("addressError").classList.add("hidden");
+      setModal(addressModal, true);
+      document.getElementById("custName").focus();
+    }
+
+    document.getElementById("searchInput").addEventListener("input", renderProducts);
+    document.querySelectorAll(".category-chip, .nav-category").forEach((button) => button.addEventListener("click", () => {
+      activeCategory = button.dataset.category;
+      document.querySelectorAll(".category-chip").forEach((chip) => {
+        const active = chip.dataset.category === activeCategory;
+        chip.classList.toggle("bg-[#282c3f]", active);
+        chip.classList.toggle("text-white", active);
+        chip.classList.toggle("bg-[#f5f5f6]", !active && chip.closest("nav"));
+        chip.classList.toggle("bg-white", !active && !chip.closest("nav"));
+      });
+      renderProducts();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }));
+
+    productGrid.addEventListener("click", (event) => {
+      const buyButton = event.target.closest("[data-buy-id]");
+      if (buyButton) {
+        event.stopPropagation();
+        openProductModal(buyButton.dataset.buyId);
+        return;
+      }
+      const addButton = event.target.closest("[data-add-id]");
+      if (addButton) {
+        event.stopPropagation();
+        addToCart(addButton.dataset.addId);
+        return;
+      }
+      const wishlistButton = event.target.closest("[data-wishlist-id]");
+      if (wishlistButton) {
+        event.stopPropagation();
+        const id = Number(wishlistButton.dataset.wishlistId);
+        if (wishlist.has(id)) wishlist.delete(id); else wishlist.add(id);
+        saveWishlist();
+        renderProducts();
+        return;
+      }
+      const card = event.target.closest("[data-product-id]");
+      if (card) openProductModal(card.dataset.productId);
+    });
+    productGrid.addEventListener("keydown", (event) => {
+      if ((event.key === "Enter" || event.key === " ") && event.target.matches("[data-product-id]")) {
+        event.preventDefault();
+        openProductModal(event.target.dataset.productId);
+      }
+    });
+    document.getElementById("sizeOptions").addEventListener("click", (event) => {
+      const button = event.target.closest(".size-btn");
+      if (!button) return;
+      selectedSize = button.dataset.size;
+      selectedSizes[selectedProductId] = button.dataset.size;
+      document.querySelectorAll(".size-btn").forEach((option) => {
+        option.classList.remove("border-black", "bg-black", "text-white");
+      });
+      button.classList.add("border-black", "bg-black", "text-white");
+    });
+    document.getElementById("modalAddToCartBtn").addEventListener("click", () => {
+      if (!selectedSize) { showToast("Please select size"); return; }
+      addToCart(selectedProductId, selectedSize);
+    });
+    document.getElementById("modalBuyNowBtn").addEventListener("click", () => {
+      if (!selectedSize) { alert("Please select a size"); return; }
+      const product = products.find((item) => item.id === selectedProductId);
+      if (!product) return;
+      selectedProductForBuy = { product, size: selectedSize };
+      document.getElementById("addressError").classList.add("hidden");
+      setModal(productModal, false);
+      setModal(addressModal, true);
+      document.getElementById("custName").focus();
+    });
+    document.getElementById("modalWishlistBtn").addEventListener("click", () => {
+      if (wishlist.has(selectedProductId)) wishlist.delete(selectedProductId); else wishlist.add(selectedProductId);
+      saveWishlist(); updateModalWishlistButton(); renderProducts();
+      showToast(wishlist.has(selectedProductId) ? "Added to wishlist" : "Removed from wishlist");
+    });
+    document.getElementById("cartIconBtn").addEventListener("click", openCartModal);
+    document.getElementById("closeCartBtn").addEventListener("click", closeCartModal);
+    document.getElementById("cartOverlay").addEventListener("click", closeCartModal);
+    document.getElementById("cartItemsList").addEventListener("click", (event) => {
+      const removeButton = event.target.closest(".remove-item");
+      const qtyButton = event.target.closest(".qty-change");
+      if (removeButton) removeFromCart(removeButton.dataset.id, removeButton.dataset.size);
+      if (qtyButton) changeQty(qtyButton.dataset.id, qtyButton.dataset.size, Number(qtyButton.dataset.change));
+    });
+    document.querySelectorAll(".modal-close").forEach((button) => button.addEventListener("click", () => {
+      const modal = button.closest("[role='dialog']");
+      setModal(modal, false);
+    }));
+    [productModal, addressModal, successModal].forEach((modal) => modal.addEventListener("click", (event) => {
+      if (event.target === modal) setModal(modal, false);
+    }));
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeTopModal(); });
+
+    document.getElementById("checkoutBtn").addEventListener("click", beginCheckout);
+    document.getElementById("addressForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const customer = {
+        name: document.getElementById("custName").value.trim(),
+        phone: document.getElementById("custPhone").value.trim(),
+        address: document.getElementById("custAddress").value.trim()
+      };
+      const addressError = document.getElementById("addressError");
+      if (!customer.name || !customer.phone || !customer.address) {
+        alert("Please fill all details");
+        return;
+      }
+      if (selectedProductForBuy) {
+        const { product, size } = selectedProductForBuy;
+        addressError.classList.add("hidden");
+        document.getElementById("addressForm").reset();
+        setModal(addressModal, false);
+        document.getElementById("successOrderId").textContent = `Order Placed for ${product.title} - Size ${size}`;
+        document.getElementById("successAddressSummary").textContent = `${customer.name} · ${customer.phone} · ${customer.address}`;
+        setModal(successModal, true);
+        return;
+      }
+      const subtotal = cart.reduce((total, item) => {
+        const product = products.find((entry) => entry.id === item.id);
+        return total + (product ? product.price * item.qty : 0);
+      }, 0);
+      const delivery = subtotal === 0 || subtotal >= config.freeDeliveryOn ? 0 : 49;
+      const orderData = {
+        customer,
+        items: cart.map((item) => ({ ...item })),
+        total: subtotal + delivery,
+        orderId: `MYN${Date.now()}`
+      };
+      console.log("Order placed:", orderData);
+      localStorage.setItem("last_order", JSON.stringify(orderData));
+      addressError.classList.add("hidden");
+      document.getElementById("addressForm").reset();
+      setModal(addressModal, false);
+      document.getElementById("successOrderId").textContent = `Order ID: ${orderData.orderId}`;
+      document.getElementById("successAddressSummary").textContent = `${customer.name} · ${customer.phone} · ${customer.address}`;
+      setModal(successModal, true);
+    });
+    document.getElementById("continueShoppingBtn").addEventListener("click", () => {
+      setModal(successModal, false);
+      cart = [];
+      localStorage.removeItem("myntra_cart");
+      updateCartUI();
+    });
+    document.getElementById("whatsappBtn").addEventListener("click", () => {
+      const whatsappNumber = String(config.whatsappNumber || "").replace(/\D/g, "");
+      if (!whatsappNumber) {
+        alert("Add number in store-config.js");
+        return;
+      }
+      window.open(`https://wa.me/${whatsappNumber}`, "_blank", "noopener,noreferrer");
+    });
+    document.getElementById("wishlistHeaderBtn").addEventListener("click", () => {
+      activeCategory = "All";
+      document.getElementById("searchInput").value = "";
+      renderProducts();
+      showToast(`${wishlist.size} ${wishlist.size === 1 ? "item" : "items"} saved in your wishlist`);
+    });
+    document.getElementById("storeLogo").addEventListener("click", (event) => {
+      event.preventDefault();
+      activeCategory = "All";
+      document.getElementById("searchInput").value = "";
+      renderProducts();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    document.title = `${config.storeName} | Fashion Store`;
+    document.getElementById("footerStoreName").textContent = config.storeName;
+    renderProducts();
+    updateCartUI();
+  </script>
+</body>
+</html>

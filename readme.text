@@ -1,0 +1,19 @@
+VastraLane - Modern Fashion Store
+
+Setup Guide (2 Minute Me)
+
+1. store-config.js file kholo.
+2. Upar storeName: "VastraLane" me apni shop ka naam likho.
+3. whatsappNumber: "9198..." me apna WhatsApp number likho (91 ke sath).
+4. products list me apne products ki photo ka link, naam, price badlo.
+5. index.html file ko double click karke open karo.
+
+Features:
+- Mobile + Desktop Responsive
+- WhatsApp Order System
+- Add to Cart + Buy Now
+- Low Stock Alert (Only 2 left!)
+Hosting:
+- Is folder ko Netlify.com pe drag-drop kar do, free live link mil jayega.
+
+Support: Fiverr pe contact karo.
